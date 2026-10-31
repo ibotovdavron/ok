@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Maqolalar: hamma o'qiy oladi, faqat kirgan foydalanuvchi o'z nomidan yozadi va o'zinikini o'chiradi
+    match /posts/{id} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.title is string && request.resource.data.title.size() <= 120
+        && request.resource.data.body is string && request.resource.data.body.size() <= 4000
+        && request.resource.data.proverb is string && request.resource.data.proverb.size() <= 200
+        && request.resource.data.category in ['food','metal','discovery','tech','agri','medicine','energy','textile','culture']
+        && request.resource.data.country in ['uz','tr','kz','az','kg','tm'];
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+    // A'zolar soni uchun
+    match /users/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
