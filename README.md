@@ -5,7 +5,9 @@ Turkiy davlatlar (🇺🇿 🇹🇷 🇰🇿 🇦🇿 🇰🇬 🇹🇲) yoshlar
 
 - **Tillar:** o‘zbek, turk, ozarbayjon, qozoq, qirg‘iz, turkman (yuqoridagi tanlagichdan almashtiriladi)
 - **Bo‘limlar:** oziq-ovqat sanoati, metallurgiya, kashfiyotlar, IT, qishloq xo‘jaligi, tibbiyot, energetika, to‘qimachilik, madaniyat va tarix
-- **Google orqali kirish** (Firebase Authentication)
+- **Boshida Google orqali ro‘yxatdan o‘tish** oynasi (Firebase Authentication)
+- **Til almashganda butun sayt almashadi:** menyu, bo‘limlar, kun maqoli va namuna maqolalar 6 tilda yozilgan; foydalanuvchilar yozgan maqolalar avtomatik tarjima qilinadi ("Asl nusxani ko‘rish" tugmasi bilan)
+- Zamonaviy animatsiyalar: harakatlanuvchi fon, scroll paytida paydo bo‘lish, silliq til almashuvi
 - Har bir maqola: yo‘nalish, davlat, matn va mavzuga mos maqol
 - Bo‘lim, davlat va qidiruv bo‘yicha saralash, kun maqoli
 

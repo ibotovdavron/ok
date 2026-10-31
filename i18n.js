@@ -23,14 +23,30 @@ export const CATEGORIES = [
   { id: "culture", icon: "🏛️" },
 ];
 
-// Kun maqollari (asl tilida)
+// Davlat → til
+export const COUNTRY_LANG = { uz: "uz", tr: "tr", kz: "kk", az: "az", kg: "ky", tm: "tk" };
+
+// Maqollar: har biri barcha 6 tilda (c — qaysi xalqdan olingani)
 export const PROVERBS = [
-  { c: "uz", text: "Bilimli ming yashar, bilimsiz bir yashar." },
-  { c: "tr", text: "Damlaya damlaya göl olur." },
-  { c: "az", text: "Elm ağlın çırağıdır." },
-  { c: "kz", text: "Білімді мыңды жығар, білекті бірді жығар." },
-  { c: "kg", text: "Билимдүү миңди жыгат, билектүү бирди жыгат." },
-  { c: "tm", text: "Bilimli müňi ýykar, bilekli biri ýykar." },
+  { c: "kz", t: { uz: "Bilagi zo‘r birni yiqar, bilimi zo‘r mingni yiqar.", tr: "Bileği güçlü birini yener, bilgisi güçlü binini yener.", az: "Qolu güclü birini yıxar, biliyi güclü minini yıxar.", kk: "Білекті бірді жығар, білімді мыңды жығар.", ky: "Билектүү бирди жыгат, билимдүү миңди жыгат.", tk: "Bilekli birini ýykar, bilimli müňüni ýykar." } },
+  { c: "tr", t: { uz: "Tomchi-tomchi ko‘l bo‘lur.", tr: "Damlaya damlaya göl olur.", az: "Damla-damla göl olar.", kk: "Тамшы тамып көл болар.", ky: "Тамчы тамып көл болот.", tk: "Damja-damja köl bolar." } },
+  { c: "az", t: { uz: "Ilm — aql chirog‘i.", tr: "İlim aklın ışığıdır.", az: "Elm ağlın çırağıdır.", kk: "Білім — ақылдың шырағы.", ky: "Билим — акылдын чырагы.", tk: "Ylym — aklyň çyrasy." } },
+  { c: "uz", t: { uz: "Birlik bor joyda tiriklik bor.", tr: "Birlikten kuvvet doğar.", az: "Birlik olan yerdə dirilik olar.", kk: "Бірлік бар жерде тірлік бар.", ky: "Биримдик бар жерде тирилик бар.", tk: "Agzybirlik bar ýerde abadançylyk bar." } },
+  { c: "kg", t: { uz: "Bilim — tuganmas xazina.", tr: "Bilgi tükenmez bir hazinedir.", az: "Bilik tükənməz xəzinədir.", kk: "Білім — таусылмас қазына.", ky: "Билим — түгөнгүс казына.", tk: "Bilim — tükenmez hazyna." } },
+  { c: "tm", t: { uz: "Ko‘p yashagan emas, ko‘p yurgan bilar.", tr: "Çok yaşayan değil, çok gezen bilir.", az: "Çox yaşayan yox, çox gəzən bilər.", kk: "Көп жасаған емес, көп жүрген біледі.", ky: "Көп жашаган эмес, көп жүргөн билет.", tk: "Köp ýaşan däl, köp gezen biler." } },
+];
+
+// Namuna maqolalar (TürkBilim jamoasi), barcha tillarda
+export const SAMPLES = [
+  { id: "s1", category: "food", country: "uz", proverb: 1, ago: 1,
+    title: { uz: "Quritilgan meva: qadimiy usul, zamonaviy eksport", tr: "Kuru meyve: kadim yöntem, modern ihracat", az: "Quru meyvə: qədim üsul, müasir ixrac", kk: "Кептірілген жеміс: ежелгі әдіс, заманауи экспорт", ky: "Кургатылган жемиш: байыркы ыкма, заманбап экспорт", tk: "Guradylan miweler: gadymy usul, döwrebap eksport" },
+    body: { uz: "Farg‘ona vodiysida o‘rik va mayizni quyoshda quritish asrlar davomida rivojlangan. Bugun bu usul zamonaviy quritgichlar bilan uyg‘unlashib, eksportga chiqmoqda.", tr: "Fergana Vadisi'nde kayısı ve kuru üzümü güneşte kurutma yöntemi yüzyıllardır gelişmiştir. Bugün bu yöntem modern kurutucularla birleşerek ihracata açılıyor.", az: "Fərqanə vadisində ərik və kişmişi günəşdə qurutma üsulu əsrlər boyu inkişaf edib. Bu gün bu üsul müasir quruducularla birləşərək ixraca çıxır.", kk: "Ферғана алқабында өрік пен мейізді күнге кептіру әдісі ғасырлар бойы дамыған. Бүгін бұл әдіс заманауи кептіргіштермен ұштасып, экспортқа шығуда.", ky: "Фергана өрөөнүндө өрүк менен мейизди күнгө кургатуу ыкмасы кылымдар бою өнүккөн. Бүгүн бул ыкма заманбап кургаткычтар менен айкалышып, экспортко чыгууда.", tk: "Fergana jülgesinde erik we kişmişi güne guratmak usuly asyrlarboýy ösüpdir. Häzir bu usul döwrebap guradyjylar bilen utgaşyp, eksporta çykýar." } },
+  { id: "s2", category: "metal", country: "kz", proverb: 0, ago: 2,
+    title: { uz: "Buyuk dashtdagi qadimiy metallurgiya", tr: "Büyük Bozkır'da kadim metalurji", az: "Böyük Bozqırda qədim metallurgiya", kk: "Ұлы даладағы ежелгі металлургия", ky: "Улуу талаадагы байыркы металлургия", tk: "Beýik sähradaky gadymy metallurgiýa" },
+    body: { uz: "Saklar davrida bronza va temir eritish san’ati yuksak darajada bo‘lgan. Bugungi Qozog‘iston metallurgiyasi shu an’ananing davomidir.", tr: "Sakalar döneminde bronz ve demir eritme sanatı çok gelişmişti. Bugünkü Kazakistan metalurjisi bu geleneğin devamıdır.", az: "Saklar dövründə tunc və dəmir əritmə sənəti yüksək səviyyədə olub. Bugünkü Qazaxıstan metallurgiyası bu ənənənin davamıdır.", kk: "Сақтар дәуірінде қола мен темір балқыту өнері жоғары деңгейде болған. Бүгінгі Қазақстан металлургиясы осы дәстүрдің жалғасы.", ky: "Сактар доорунда коло жана темир эритүү өнөрү жогорку деңгээлде болгон. Бүгүнкү Казакстандын металлургиясы ушул салттын уландысы.", tk: "Saklar döwründe bürünç we demir eretmek sungaty ýokary derejede bolupdyr. Häzirki Gazagystanyň metallurgiýasy şol däbiň dowamydyr." } },
+  { id: "s3", category: "discovery", country: "tr", proverb: 2, ago: 3,
+    title: { uz: "Go‘beklitepa: tarixni qayta yozgan kashfiyot", tr: "Göbeklitepe: tarihi yeniden yazan keşif", az: "Göbəklitəpə: tarixi yenidən yazan kəşf", kk: "Гөбеклитепе: тарихты қайта жазған ашылу", ky: "Гөбеклитепе: тарыхты кайра жазган ачылыш", tk: "Göbeklitepe: taryhy täzeden ýazan açyş" },
+    body: { uz: "Taxminan 12 ming yillik Go‘beklitepa insoniyatning ilk monumental inshootlaridan biri sifatida arxeologiyadagi buyuk kashfiyot hisoblanadi.", tr: "Yaklaşık 12 bin yıllık Göbeklitepe, insanlığın ilk anıtsal yapılarından biri olarak arkeolojinin en büyük keşiflerinden sayılır.", az: "Təxminən 12 min illik Göbəklitəpə bəşəriyyətin ilk monumental tikililərindən biri kimi arxeologiyanın böyük kəşfi sayılır.", kk: "Шамамен 12 мың жылдық Гөбеклитепе адамзаттың алғашқы монументалды құрылыстарының бірі ретінде археологиядағы ұлы ашылу саналады.", ky: "Болжол менен 12 миң жылдык Гөбеклитепе адамзаттын алгачкы монументалдык курулуштарынын бири катары археологиядагы улуу ачылыш болуп эсептелет.", tk: "Takmynan 12 müň ýyllyk Göbeklitepe adamzadyň ilkinji monumental binalarynyň biri hökmünde arheologiýanyň beýik açyşy hasaplanýar." } },
 ];
 
 export const T = {
@@ -137,3 +153,14 @@ export const T = {
     country: { uz: "Özbegistan", tr: "Türkiýe", kz: "Gazagystan", az: "Azerbaýjan", kg: "Gyrgyzystan", tm: "Türkmenistan" },
   },
 };
+
+// Qo'shimcha matnlar (ro'yxatdan o'tish oynasi, tarjima)
+const EXTRA = {
+  uz: { gateSub: "Boshlash uchun Google hisobingiz orqali ro‘yxatdan o‘ting", signup: "Google orqali ro‘yxatdan o‘tish", gateNote: "Bir bosishda — parolsiz va xavfsiz", f1: "6 tilda", f2: "9 yo‘nalish", f3: "Maqollar bilan", translated: "Avtomatik tarjima", original: "Asl nusxani ko‘rish", showTr: "Tarjimani ko‘rish", demoLogin: "Google kirish hali sozlanmagan — namuna rejimida kirdingiz", welcome: "Xush kelibsiz", origLabel: "Asli", team: "TürkBilim jamoasi" },
+  tr: { gateSub: "Başlamak için Google hesabınızla kaydolun", signup: "Google ile kaydol", gateNote: "Tek tıkla — şifresiz ve güvenli", f1: "6 dilde", f2: "9 alan", f3: "Atasözleriyle", translated: "Otomatik çeviri", original: "Orijinalini gör", showTr: "Çeviriyi gör", demoLogin: "Google girişi henüz ayarlanmadı — deneme modunda girdiniz", welcome: "Hoş geldiniz", origLabel: "Aslı", team: "TürkBilim ekibi" },
+  az: { gateSub: "Başlamaq üçün Google hesabınızla qeydiyyatdan keçin", signup: "Google ilə qeydiyyat", gateNote: "Bir kliklə — parolsuz və təhlükəsiz", f1: "6 dildə", f2: "9 sahə", f3: "Atalar sözləri ilə", translated: "Avtomatik tərcümə", original: "Orijinala bax", showTr: "Tərcüməyə bax", demoLogin: "Google girişi hələ qurulmayıb — sınaq rejimində daxil oldunuz", welcome: "Xoş gəlmisiniz", origLabel: "Əsli", team: "TürkBilim komandası" },
+  kk: { gateSub: "Бастау үшін Google аккаунтыңыз арқылы тіркеліңіз", signup: "Google арқылы тіркелу", gateNote: "Бір басуда — құпиясөзсіз әрі қауіпсіз", f1: "6 тілде", f2: "9 сала", f3: "Мақалдармен", translated: "Автоматты аударма", original: "Түпнұсқаны көру", showTr: "Аударманы көру", demoLogin: "Google кіру әлі бапталмаған — сынақ режимінде кірдіңіз", welcome: "Қош келдіңіз", origLabel: "Түпнұсқасы", team: "TürkBilim командасы" },
+  ky: { gateSub: "Баштоо үчүн Google аккаунтуңуз аркылуу катталыңыз", signup: "Google аркылуу катталуу", gateNote: "Бир басуу менен — сырсөзсүз жана коопсуз", f1: "6 тилде", f2: "9 тармак", f3: "Макалдар менен", translated: "Автоматтык котормо", original: "Түп нускасын көрүү", showTr: "Котормону көрүү", demoLogin: "Google кирүү азырынча жөндөлгөн эмес — сыноо режиминде кирдиңиз", welcome: "Кош келиңиз", origLabel: "Түп нускасы", team: "TürkBilim командасы" },
+  tk: { gateSub: "Başlamak üçin Google hasabyňyz arkaly hasaba duruň", signup: "Google arkaly hasaba dur", gateNote: "Bir basyşda — açarsözsiz we howpsuz", f1: "6 dilde", f2: "9 ugur", f3: "Nakyllar bilen", translated: "Awtomatik terjime", original: "Aslyny gör", showTr: "Terjimäni gör", demoLogin: "Google girişi heniz sazlanmady — synag tertibinde girdiňiz", welcome: "Hoş geldiňiz", origLabel: "Asly", team: "TürkBilim topary" },
+};
+for (const [l, v] of Object.entries(EXTRA)) Object.assign(T[l], v);
