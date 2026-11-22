@@ -1,125 +1,382 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uz">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07111c">
-<title>TürkBilim — Turkiy dunyoda bilim almashaylik</title>
-<meta name="description" content="Turkiy davlatlar yoshlari o‘z sohalaridagi bilim, tajriba va kashfiyotlarni maqollar bilan ulashadigan maydon.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐺</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KoʻzMadad AI</title>
+  <meta name="description" content="KoʻzMadad AI — koʻzi ojiz va zaif koʻruvchilar uchun atrofni oʻzbek tilida gapirib beradigan sunʼiy intellekt yordamchi.">
+  <meta name="theme-color" content="#22152f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%237e22ce'/><path d='M8 32s9-14 24-14 24 14 24 14-9 14-24 14S8 32 8 32z' fill='none' stroke='white' stroke-width='4'/><circle cx='32' cy='32' r='7' fill='white'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="loading">
-<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<body>
+  <a class="skip" href="#main">Asosiy mazmunga oʻtish</a>
 
-<!-- Ro'yxatdan o'tish oynasi -->
-<section class="gate" id="gate" hidden>
-  <div class="gate-card">
-    <div class="ring" aria-hidden="true"><span>🐺</span></div>
-    <div class="gate-langs" id="gateLangs"></div>
-    <h1 class="gate-title"><span id="gateSlogan"></span></h1>
-    <p data-i18n="gateSub"></p>
-    <button class="btn google big" id="gateLogin">
-      <svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-      <span data-i18n="signup"></span>
-    </button>
-    <small class="note">🔒 <span data-i18n="gateNote"></span></small>
-    <ul class="feats">
-      <li>🌍 <span data-i18n="f1"></span></li>
-      <li>📚 <span data-i18n="f2"></span></li>
-      <li>💬 <span data-i18n="f3"></span></li>
-    </ul>
-  </div>
-</section>
-
-<div class="app" id="app">
-<header class="nav">
-  <a class="brand" href="#top"><span class="logo">🐺</span><span>Türk<b>Bilim</b></span></a>
-  <div class="nav-right">
-    <select id="lang" aria-label="Til / Dil / Тіл"></select>
-    <div id="user" class="user" hidden>
-      <img id="avatar" alt="">
-      <button class="btn ghost small" data-i18n="logout" id="logout"></button>
+  <header class="topbar" id="top">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="KoʻzMadad AI — bosh sahifa">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64"><path d="M8 32s9-14 24-14 24 14 24 14-9 14-24 14S8 32 8 32z" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="32" cy="32" r="7" fill="currentColor"/></svg>
+        </span>
+        KoʻzMadad AI
+      </a>
+      <nav class="nav" aria-label="Asosiy menyu">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="nav-list">Menyu</button>
+        <ul id="nav-list">
+          <li><a href="#muammo">Muammo</a></li>
+          <li><a href="#yechim">Yechim</a></li>
+          <li><a href="#qanday">Qanday ishlaydi</a></li>
+          <li><a href="#prototip">Prototip</a></li>
+          <li><a href="#reja">Reja</a></li>
+          <li><a href="#jamoa">Jamoa</a></li>
+        </ul>
+      </nav>
     </div>
-  </div>
-</header>
-
-<main class="swap">
-<section class="hero" id="top">
-  <div class="hero-text">
-    <div class="flags" id="flags"></div>
-    <p class="hello reveal"><span data-i18n="welcome"></span>, <b id="hello"></b> 👋</p>
-    <h1 class="reveal" data-i18n="slogan"></h1>
-    <p class="lead reveal" data-i18n="heroText"></p>
-    <div class="actions reveal">
-      <button class="btn glow" id="shareBtn">✍️ <span data-i18n="share"></span></button>
-      <a class="btn ghost" href="#feed" data-i18n="explore"></a>
+    <div class="a11y-bar" role="toolbar" aria-label="Qulaylik sozlamalari">
+      <div class="wrap a11y-inner">
+        <button id="read-page" class="tool tool-primary" aria-pressed="false">
+          <span aria-hidden="true">🔊</span> <span class="lbl">Sahifani ovoz bilan oʻqish</span>
+        </button>
+        <button id="font-down" class="tool" aria-label="Matnni kichraytirish">A−</button>
+        <button id="font-up" class="tool" aria-label="Matnni kattalashtirish">A+</button>
+        <button id="contrast" class="tool" aria-pressed="false">Yuqori kontrast</button>
+        <button id="theme" class="tool" aria-pressed="false">Qorongʻi rejim</button>
+      </div>
     </div>
-    <div class="stats reveal">
-      <div><strong id="sPosts">0</strong><span data-i18n="statPosts"></span></div>
-      <div><strong id="sMembers">0</strong><span data-i18n="statMembers"></span></div>
-      <div><strong id="sCountries">6</strong><span data-i18n="statCountries"></span></div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title" data-read>
+      <div class="orb orb-1" aria-hidden="true"></div>
+      <div class="orb orb-2" aria-hidden="true"></div>
+      <div class="wrap hero-inner">
+        <p class="pill">Sunʼiy intellekt</p>
+        <h1 id="hero-title">KoʻzMadad AI</h1>
+        <p class="lead">Koʻzi ojiz va zaif koʻruvchilar uchun atrofni oʻzbek tilida <q>gapirib beradigan</q> sunʼiy intellekt yordamchi.</p>
+        <p class="motto">Kameraga koʻrsat — eshit — mustaqil boʻl</p>
+        <div class="hero-cta">
+          <a class="btn btn-light" href="#prototip">Prototipni sinab koʻrish</a>
+          <a class="btn btn-ghost" href="#muammo">Batafsil</a>
+        </div>
+        <p class="author">Oltinsoy tuman 68-umumtaʼlim maktabi oʻquvchisi <strong>Sayfullayeva Madina</strong></p>
+      </div>
+    </section>
+
+    <!-- 01 MUAMMO -->
+    <section id="muammo" class="section" aria-labelledby="muammo-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">01 · Muammo</p>
+        <h2 id="muammo-title">Koʻrmaydigan inson uchun dunyo — <q>jim</q></h2>
+        <div class="grid g3 stats">
+          <article class="card stat reveal">
+            <p class="num"><span data-count="25558">25 558</span> nafar</p>
+            <p>koʻzi ojizligi boʻyicha nogironligi roʻyxatga olingan fuqaro (2025-yil 1-noyabr)</p>
+          </article>
+          <article class="card stat reveal">
+            <p class="num"><span data-count="3171">3 171</span> nafar</p>
+            <p>koʻzi ojiz va zaif koʻruvchi oʻquvchi 17 ta maxsus maktabda oʻqiydi</p>
+          </article>
+          <article class="card stat reveal">
+            <p class="num"><span data-count="41000">41 000</span>+</p>
+            <p>koʻzi ojiz foydalanuvchi maxsus kutubxonalar xizmatidan foydalanadi</p>
+          </article>
+        </div>
+        <p class="statement reveal">Pul, dori qutisi, avtobus raqami, oddiy xat — bularning hammasi koʻrmaydigan inson uchun <strong>boshqa odamning yordamini</strong> talab qiladi.</p>
+        <ul class="grid g3 chips" role="list">
+          <li class="chip reveal">Brayl adabiyoti va audio resurslar kam</li>
+          <li class="chip reveal">Xorijiy ilovalar oʻzbek tilida emas</li>
+          <li class="chip reveal">Mustaqil yurish va oʻqish qiyin</li>
+        </ul>
+        <p class="source">Manbalar: Ijtimoiy himoya milliy agentligi (anhor.uz, kun.uz, 2025), involta.uz (2024)</p>
+      </div>
+    </section>
+
+    <!-- 02 YECHIM -->
+    <section id="yechim" class="section section-purple" aria-labelledby="yechim-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">02 · Yechim</p>
+        <h2 id="yechim-title">Kameraga koʻrsat — eshit — mustaqil boʻl</h2>
+        <p class="intro">KoʻzMadad AI — smartfon kamerasi orqali atrofni taniydigan va oʻzbek tilida ovoz bilan aytib beradigan mobil ilova.</p>
+        <div class="grid g3">
+          <article class="card feature reveal">
+            <span class="badge" aria-hidden="true">1</span>
+            <div class="f-icon" aria-hidden="true">📖</div>
+            <h3>Matnni oʻqib berish</h3>
+            <p>Kitob, xat, dori yoʻriqnomasi, narx yorligʻi — lotin va kirill yozuvida, ovoz bilan.</p>
+          </article>
+          <article class="card feature reveal">
+            <span class="badge" aria-hidden="true">2</span>
+            <div class="f-icon" aria-hidden="true">💵</div>
+            <h3>Pul va buyumlarni tanish</h3>
+            <p>Soʻm banknotalari, ranglar, oziq-ovqat va uy buyumlari — bir soniyada.</p>
+          </article>
+          <article class="card feature reveal">
+            <span class="badge" aria-hidden="true">3</span>
+            <div class="f-icon" aria-hidden="true">🦯</div>
+            <h3>Yoʻlda yordam</h3>
+            <p>Toʻsiqlarni, eshik va zinapoyani aniqlaydi, avtobus raqamini oʻqib beradi.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 QANDAY ISHLAYDI -->
+    <section id="qanday" class="section" aria-labelledby="qanday-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">03 · Qanday ishlaydi</p>
+        <h2 id="qanday-title">Texnik yechim: 4 qadam</h2>
+        <ol class="steps" role="list">
+          <li class="card step reveal">
+            <span class="step-n">01</span>
+            <h3>Kamera</h3>
+            <p>Foydalanuvchi telefonni yoʻnaltiradi yoki ovoz bilan buyruq beradi: <q>Bu nima?</q>, <q>Oʻqi</q>.</p>
+          </li>
+          <li class="card step reveal">
+            <span class="step-n">02</span>
+            <h3>SI modellari</h3>
+            <p>OCR, obyektni tanish va banknota modeli telefonda, internetsiz ishlaydi.</p>
+          </li>
+          <li class="card step reveal">
+            <span class="step-n">03</span>
+            <h3>Tavsif</h3>
+            <p>Koʻp modalli til modeli murakkab sahnani qisqa oʻzbekcha jumlaga aylantiradi.</p>
+          </li>
+          <li class="card step reveal">
+            <span class="step-n">04</span>
+            <h3>Ovoz va tebranish</h3>
+            <p>Oʻzbekcha nutq sintezi, toʻsiq yaqinlashsa — tebranish signali.</p>
+          </li>
+        </ol>
+        <ul class="grid g4 chips" role="list">
+          <li class="chip reveal">Internetsiz asosiy funksiyalar</li>
+          <li class="chip reveal">Oʻzbek lotin + kirill OCR</li>
+          <li class="chip reveal">Ovozli boshqaruv</li>
+          <li class="chip reveal">Ekran oʻqish dasturlari bilan mos</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 04 INNOVATSIYA -->
+    <section id="innovatsiya" class="section section-alt" aria-labelledby="inn-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">04 · Innovatsiya</p>
+        <h2 id="inn-title">Loyihaning yangiligi nimada?</h2>
+        <div class="grid g2">
+          <article class="card inn reveal"><span class="badge" aria-hidden="true">1</span><div><h3>Toʻliq oʻzbek tilida</h3><p>Interfeys, ovozli buyruqlar va javoblar oʻzbekcha — lotin va kirill matnlarini oʻqiydi.</p></div></article>
+          <article class="card inn reveal"><span class="badge" aria-hidden="true">2</span><div><h3>Soʻm banknotalarini tanish</h3><p>Mahalliy pul birliklarida oʻqitilgan model — savdoda mustaqillik.</p></div></article>
+          <article class="card inn reveal"><span class="badge" aria-hidden="true">3</span><div><h3>Internetsiz ishlash</h3><p>Asosiy modellar telefonda: aloqa yoʻq joyda ham, maxfiylik ham saqlanadi.</p></div></article>
+          <article class="card inn reveal"><span class="badge" aria-hidden="true">4</span><div><h3>Koʻzi ojizlar bilan birga yaratilgan</h3><p>Har bir funksiya maxsus maktab oʻquvchilari va jamiyat aʼzolari bilan sinovdan oʻtkaziladi.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 TAQQOSLASH -->
+    <section id="taqqoslash" class="section" aria-labelledby="taq-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">05 · Analoglar bilan taqqoslash</p>
+        <h2 id="taq-title">KoʻzMadad AI mavjud usullardan nimasi bilan afzal?</h2>
+        <div class="table-wrap reveal" tabindex="0" role="region" aria-label="Taqqoslash jadvali, gorizontal aylantirish mumkin">
+          <table class="compare">
+            <caption class="sr-only">KoʻzMadad AI va boshqa usullarni taqqoslash</caption>
+            <thead>
+              <tr>
+                <th scope="col">Mezon</th>
+                <th scope="col">Boshqa odam yordami</th>
+                <th scope="col">Xorijiy SI ilovalar</th>
+                <th scope="col">Koʻngilli video-qoʻngʻiroq</th>
+                <th scope="col" class="hl">KoʻzMadad AI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Oʻzbek tili</th><td>Ha</td><td class="no">Odatda yoʻq</td><td>Koʻngilliga bogʻliq</td><td class="hl">✓ Ha, toʻliq</td></tr>
+              <tr><th scope="row">Soʻm banknotalari</th><td>Ha</td><td class="no">Yoʻq yoki cheklangan</td><td>Ha</td><td class="hl">✓ Ha</td></tr>
+              <tr><th scope="row">Mustaqillik</th><td class="no">Yoʻq</td><td>Ha</td><td>Qisman</td><td class="hl">✓ Ha</td></tr>
+              <tr><th scope="row">Internetsiz</th><td>—</td><td class="no">Koʻpincha yoʻq</td><td class="no">Yoʻq</td><td class="hl">✓ Ha</td></tr>
+              <tr><th scope="row">Narx</th><td>—</td><td>Bepul yoki pullik</td><td>Bepul</td><td class="hl">✓ Bepul</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Xulosa: KoʻzMadad AI mahalliy til va pul birligini tushunadigan, internetsiz ishlaydigan bepul yordamchi.</p>
+      </div>
+    </section>
+
+    <!-- 06 PROTOTIP -->
+    <section id="prototip" class="section section-alt" aria-labelledby="proto-title">
+      <div class="wrap proto">
+        <div class="proto-text" data-read>
+          <p class="eyebrow">06 · Prototip (MVP)</p>
+          <h2 id="proto-title">Prototip: ovozli yordamchi</h2>
+          <p>Quyidagi tugmalardan birini bosing — ilova qanday javob berishini koʻrasiz va eshitasiz. Bu ilova ishlashining namunasi.</p>
+          <div class="demo-buttons" role="group" aria-label="Namuna buyruqlar">
+            <button class="btn btn-purple" data-demo="pul">🎙 “Bu qancha pul?”</button>
+            <button class="btn btn-purple" data-demo="oqi">🎙 “Oʻqib ber”</button>
+            <button class="btn btn-purple" data-demo="yol">🎙 “Oldimda nima bor?”</button>
+            <button class="btn btn-purple" data-demo="rang">🎙 “Bu qanday rang?”</button>
+          </div>
+          <h3 class="mvp-h">MVP holati</h3>
+          <ul class="status" role="list">
+            <li><span class="st st-done" aria-hidden="true">✓</span> Soʻm banknotalarini tanish modeli tayyor <span class="muted">(aniqlik sinovlarda oʻlchanmoqda)</span><span class="sr-only"> — tayyor</span></li>
+            <li><span class="st st-done" aria-hidden="true">✓</span> Oʻzbekcha OCR va ovozli oʻqish ishlayapti<span class="sr-only"> — tayyor</span></li>
+            <li><span class="st st-prog" aria-hidden="true">◐</span> Toʻsiqlarni aniqlash va tebranish signali sinovda<span class="sr-only"> — jarayonda</span></li>
+            <li><span class="st st-next" aria-hidden="true">○</span> Koʻzi ojizlar maxsus maktabida sinov<span class="sr-only"> — keyingi qadam</span></li>
+          </ul>
+          <p class="legend" aria-hidden="true">✓ tayyor · ◐ jarayonda · ○ keyingi qadam</p>
+        </div>
+        <div class="phone reveal" aria-label="Ilova ekrani namunasi">
+          <div class="phone-notch" aria-hidden="true"></div>
+          <div class="phone-head"><span class="dot" aria-hidden="true"></span> KoʻzMadad AI</div>
+          <div class="chat" id="chat" role="log" aria-live="polite" aria-label="Yordamchi bilan suhbat">
+            <div class="msg me">🎙 “Bu qancha pul?”</div>
+            <div class="msg ai">🔊 <strong>Ellik ming soʻm</strong>, bitta banknota.</div>
+            <div class="msg me">🎙 “Oʻqib ber”</div>
+            <div class="msg ai">🔊 Paratsetamol, 500 mg. Kuniga 3 mahal…</div>
+            <div class="msg warn">📳 Diqqat: 2 metr oldinda zinapoya</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 MOLIYA -->
+    <section id="moliya" class="section" aria-labelledby="mol-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">07 · Iqtisodiy hisob</p>
+        <h2 id="mol-title">Moliyaviy reja: 3 yil (taxminiy hisob)</h2>
+        <div class="grid g4 stats">
+          <article class="card stat reveal"><p class="num sm">180 mln soʻm</p><p>Boshlangʻich investitsiya</p></article>
+          <article class="card stat reveal"><p class="num sm">297 mln soʻm</p><p>Jami moliyalashtirish ehtiyoji</p></article>
+          <article class="card stat reveal"><p class="num sm">651 mln soʻm</p><p>3-yildagi sof foyda</p></article>
+          <article class="card stat reveal"><p class="num sm">25 oy</p><p>Investitsiyaning qoplanish muddati</p></article>
+        </div>
+        <div class="fin">
+          <div class="card reveal fin-chart">
+            <h3>Daromad va sof foyda, mln soʻm</h3>
+            <div class="bars" role="img" aria-label="1-yil: daromad 270, sof foyda minus 117. 2-yil: daromad 925, sof foyda 220. 3-yil: daromad 1785, sof foyda 651.">
+              <div class="bar-group"><div class="bar-pair"><div class="bar rev" style="--v:270"><span>270</span></div><div class="bar neg" style="--v:117"><span>−117</span></div></div><p>1-yil</p></div>
+              <div class="bar-group"><div class="bar-pair"><div class="bar rev" style="--v:925"><span>925</span></div><div class="bar prof" style="--v:220"><span>220</span></div></div><p>2-yil</p></div>
+              <div class="bar-group"><div class="bar-pair"><div class="bar rev" style="--v:1785"><span>1 785</span></div><div class="bar prof" style="--v:651"><span>651</span></div></div><p>3-yil</p></div>
+            </div>
+            <p class="bar-legend" aria-hidden="true"><span class="k rev"></span>Daromad <span class="k prof"></span>Sof foyda <span class="k neg"></span>Zarar</p>
+          </div>
+          <div class="table-wrap reveal" tabindex="0" role="region" aria-label="Moliyaviy jadval">
+            <table class="fin-table">
+              <caption class="sr-only">Uch yillik moliyaviy reja, mln soʻm</caption>
+              <thead><tr><th scope="col">mln soʻm</th><th scope="col">1-yil</th><th scope="col">2-yil</th><th scope="col">3-yil</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Daromad</th><td>270</td><td>925</td><td>1 785</td></tr>
+                <tr><th scope="row">Xarajatlar</th><td>−377</td><td>−668</td><td>−1 020</td></tr>
+                <tr><th scope="row">Soliqlar</th><td>−11</td><td>−37</td><td>−115</td></tr>
+                <tr class="total"><th scope="row">Sof foyda</th><td>−117</td><td>220</td><td>651</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card reveal assumptions">
+            <h3>Asosiy farazlar</h3>
+            <ul>
+              <li>Foydalanuvchi uchun ilova — bepul</li>
+              <li>OCR/ovoz API: 24–30 mln soʻm/yil bitta kompaniyaga</li>
+              <li>Homiy kompaniyalar: 2 → 5 → 8</li>
+              <li>3-yildan grantsiz oʻzini moliyalaydi</li>
+            </ul>
+          </div>
+        </div>
+        <p class="source">Hisob: 1 $ ≈ 12 000 soʻm; elektr 1 100 soʻm/kVt·soat, gaz 2 000 soʻm/m³ (2026); ijtimoiy soliq 12%; aylanma soligʻi 4% yoki foyda soligʻi 15%</p>
+      </div>
+    </section>
+
+    <!-- 08 REJA -->
+    <section id="reja" class="section section-alt" aria-labelledby="reja-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">08 · Amaliyotga tatbiq etish</p>
+        <h2 id="reja-title">Bosqichma-bosqich tatbiq etish rejasi</h2>
+        <ol class="timeline" role="list">
+          <li class="reveal"><p class="t-when">0–3 oy</p><h3>MVP</h3><p>Banknota va matn oʻqish, ovozli boshqaruv.</p></li>
+          <li class="reveal"><p class="t-when">3–6 oy</p><h3>Maktab piloti</h3><p>Koʻzi ojizlar maxsus maktabida sinov, fikr-mulohaza asosida takomillashtirish.</p></li>
+          <li class="reveal"><p class="t-when">6–12 oy</p><h3>Ommaviy reliz</h3><p>Play Marketʼda bepul, toʻsiqlarni aniqlash, internetsiz rejim.</p></li>
+          <li class="reveal"><p class="t-when">12–24 oy</p><h3>Kengayish</h3><p>Navigatsiya, qozoq, qirgʻiz, tojik tillari, iOS versiyasi.</p></li>
+        </ol>
+        <div class="card partners reveal">
+          <h3 class="eyebrow">Hamkorlar</h3>
+          <ul role="list">
+            <li>Ijtimoiy himoya milliy agentligi</li>
+            <li>Oʻzbekiston koʻzi ojizlar jamiyati</li>
+            <li>Maxsus maktab-internatlar</li>
+            <li>Koʻzi ojizlar kutubxonalari</li>
+            <li>IT Park</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 NATIJALAR -->
+    <section id="natijalar" class="section" aria-labelledby="nat-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">09 · Kutilayotgan natijalar</p>
+        <h2 id="nat-title">1-yil yakunidagi maqsadli koʻrsatkichlar</h2>
+        <div class="grid g3 stats">
+          <article class="card stat reveal"><p class="num"><span data-count="5000">5 000</span>+</p><p>faol foydalanuvchi — koʻzi ojiz va zaif koʻruvchilar</p></article>
+          <article class="card stat reveal"><p class="num"><span data-count="17">17</span> ta</p><p>maxsus maktabning barchasiga bepul joriy etish</p></article>
+          <article class="card stat reveal"><p class="num">1 soniya</p><p>banknota yoki buyumni tanish vaqti</p></article>
+          <article class="card stat reveal"><p class="num"><span data-count="95">95</span>%+</p><p>soʻm banknotalarini tanish aniqligi (maqsad)</p></article>
+          <article class="card stat reveal"><p class="num">2 yozuv</p><p>lotin va kirill matnlarini oʻqish</p></article>
+          <article class="card stat reveal"><p class="num">0 soʻm</p><p>foydalanuvchi uchun narx</p></article>
+        </div>
+        <p class="source">Koʻrsatkichlar — loyiha maqsadlari (prognoz). Asosiy taʼsir: kundalik hayotda mustaqillik va taʼlimga teng kirish.</p>
+      </div>
+    </section>
+
+    <!-- 10 JAMOA VA XAVFLAR -->
+    <section id="jamoa" class="section section-alt" aria-labelledby="jamoa-title" data-read>
+      <div class="wrap">
+        <p class="eyebrow">10 · Jamoa va xavflar</p>
+        <h2 id="jamoa-title">Kim amalga oshiradi va qanday xavflar bor?</h2>
+        <div class="team-grid">
+          <div class="card reveal">
+            <h3>68-maktab jamoasi</h3>
+            <ul class="team" role="list">
+              <li><span class="avatar" aria-hidden="true">SM</span><div><strong>Sayfullayeva Madina</strong><span>Loyiha rahbari, SI modellari, mobil dasturchi</span></div></li>
+              <li><span class="avatar" aria-hidden="true">AR</span><div><strong>Azizbek Raufov</strong><span>Ilmiy rahbar / maxsus pedagog</span></div></li>
+            </ul>
+          </div>
+          <div class="card reveal">
+            <h3>Xavflar va ularni kamaytirish</h3>
+            <dl class="risks">
+              <div><dt>Notoʻgʻri tanish (masalan, pul)</dt><dd>Ishonch past boʻlsa — <q>aniq emas, qayta koʻrsating</q> deb aytadi.</dd></div>
+              <div><dt>Xavfsizlik boʻyicha ortiqcha ishonch</dt><dd>Ilova hassa va hamrohni almashtirmaydi — bu ochiq aytiladi.</dd></div>
+              <div><dt>Maxfiylik</dt><dd>Rasmlar telefonda qayta ishlanadi, serverga yuborilmaydi.</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- XULOSA -->
+    <section id="xulosa" class="section section-dark" aria-labelledby="xul-title" data-read>
+      <div class="orb orb-3" aria-hidden="true"></div>
+      <div class="wrap">
+        <p class="eyebrow">Xulosa</p>
+        <h2 id="xul-title">Koʻrish — ovoz orqali</h2>
+        <div class="grid g3">
+          <article class="card dark reveal"><h3 class="eyebrow">Muammo</h3><p>25 mingdan ortiq koʻzi ojiz fuqaro kundalik ishlarda boshqalarga bogʻliq.</p></article>
+          <article class="card dark reveal"><h3 class="eyebrow">Yechim</h3><p>Oʻzbekcha gapiradigan, soʻmni taniydigan, internetsiz ishlaydigan SI yordamchi.</p></article>
+          <article class="card dark reveal"><h3 class="eyebrow">Natija</h3><p>Mustaqillik, taʼlimga teng kirish, inklyuziv jamiyat.</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <p><strong>KoʻzMadad AI</strong> — Oltinsoy tuman 68-umumtaʼlim maktabi loyihasi.</p>
+      <p class="muted">Klaviatura: <kbd>Alt</kbd> + <kbd>R</kbd> — sahifani ovoz bilan oʻqish / toʻxtatish.</p>
+      <a href="#top">Yuqoriga ↑</a>
     </div>
-  </div>
-  <aside class="proverb-card reveal" id="proverbCard" title="↻">
-    <small data-i18n="proverbDay"></small>
-    <blockquote id="proverb"></blockquote>
-    <span id="proverbFrom"></span>
-    <em id="proverbOrig"></em>
-    <div class="dots" id="proverbDots"></div>
-  </aside>
-</section>
+  </footer>
 
-<p class="demo" id="demo" data-i18n="demoNote" hidden></p>
-
-<section class="sec" id="sections">
-  <h2 class="reveal" data-i18n="sections"></h2>
-  <div class="cats" id="cats"></div>
-</section>
-
-<section class="sec" id="feed">
-  <div class="feed-head reveal">
-    <h2 data-i18n="latest"></h2>
-    <div class="filters">
-      <input id="q" type="search" data-i18n-ph="search">
-      <select id="countryFilter"></select>
-    </div>
-  </div>
-  <div class="grid" id="posts"></div>
-  <p class="empty" id="empty" data-i18n="empty" hidden></p>
-</section>
-
-<footer>
-  <div class="ornament"></div>
-  <p><b>TürkBilim</b> — <span data-i18n="footer"></span></p>
-  <p class="muted">🇺🇿 🇹🇷 🇰🇿 🇦🇿 🇰🇬 🇹🇲</p>
-</footer>
-</main>
-</div>
-
-<button class="fab" id="fab" aria-label="+">＋</button>
-
-<dialog id="dlg">
-  <form id="form" method="dialog">
-    <h3 data-i18n="formTitle"></h3>
-    <label><span data-i18n="fTitle"></span><input id="fTitle" maxlength="120" required></label>
-    <div class="row">
-      <label><span data-i18n="fCategory"></span><select id="fCategory"></select></label>
-      <label><span data-i18n="fCountry"></span><select id="fCountry"></select></label>
-    </div>
-    <label><span data-i18n="fBody"></span><textarea id="fBody" rows="6" maxlength="4000" required></textarea></label>
-    <label><span data-i18n="fProverb"></span><input id="fProverb" maxlength="200" data-i18n-ph="fProverbHint" required></label>
-    <div class="actions end">
-      <button type="button" class="btn ghost" id="cancel" data-i18n="cancel"></button>
-      <button type="submit" class="btn" data-i18n="publish"></button>
-    </div>
-  </form>
-</dialog>
-
-<div class="toast" id="toast"></div>
-
-<script type="module" src="app.js"></script>
+  <div id="sr-status" class="sr-only" aria-live="polite"></div>
+  <script src="app.js"></script>
 </body>
 </html>

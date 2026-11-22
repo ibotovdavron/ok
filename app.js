@@ -1,364 +1,201 @@
-import { LANGS, COUNTRIES, FLAGS, CATEGORIES, PROVERBS, SAMPLES, COUNTRY_LANG, T } from "./i18n.js";
-import { firebaseConfig } from "./firebase-config.js";
+(function () {
+  "use strict";
+  var root = document.documentElement;
+  root.classList.add("js");
+  var srStatus = document.getElementById("sr-status");
+  function announce(msg) { srStatus.textContent = ""; setTimeout(function () { srStatus.textContent = msg; }, 50); }
 
-const $ = (id) => document.getElementById(id);
-const FB = "https://www.gstatic.com/firebasejs/10.12.2/";
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-const state = { lang: "uz", user: null, posts: [], cat: "all", country: "all", q: "", proverb: 0 };
-let store; // ma'lumotlar qatlami: Firebase yoki namuna rejimi
-
-/* ---------- Kichik yordamchilar ---------- */
-const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
-const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-const t = (k) => T[state.lang][k] ?? T.uz[k];
-
-function toast(msg) {
-  const el = $("toast");
-  el.textContent = msg; el.classList.add("show");
-  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 3200);
-}
-
-function countUp(el, n) {
-  const from = +el.textContent || 0;
-  if (reduced || from === n) { el.textContent = n; return; }
-  const t0 = performance.now(), dur = 900;
-  const step = (now) => {
-    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-    el.textContent = Math.round(from + (n - from) * e);
-    if (k < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-
-/* ---------- Ko'rinish paydo bo'lishi (scroll animatsiya) ---------- */
-const revealIO = new IntersectionObserver((es) => es.forEach((e) => {
-  if (e.isIntersecting) { e.target.classList.add("in"); revealIO.unobserve(e.target); }
-}), { threshold: 0.12 });
-const observeReveals = (root = document) => root.querySelectorAll(".reveal:not(.in)").forEach((el) => revealIO.observe(el));
-
-/* ---------- Avtomatik tarjima (foydalanuvchi maqolalari uchun) ---------- */
-const trCache = lsGet("tb-tr", {});
-let trSaveT;
-const queue = []; let active = 0;
-function limit(fn) {
-  return new Promise((res, rej) => {
-    const run = async () => { active++; try { res(await fn()); } catch (e) { rej(e); } finally { active--; queue.length && queue.shift()(); } };
-    active < 4 ? run() : queue.push(run);
-  });
-}
-async function translate(text, tl) {
-  if (!text) return text;
-  const key = tl + "|" + text;
-  if (trCache[key]) return trCache[key];
-  const out = await limit(async () => {
-    const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&q=${encodeURIComponent(text)}`);
-    if (!r.ok) throw new Error("tr " + r.status);
-    const j = await r.json();
-    return j[2] === tl ? text : j[0].map((s) => s[0]).join("");
-  });
-  trCache[key] = out;
-  clearTimeout(trSaveT);
-  trSaveT = setTimeout(() => {
-    const keys = Object.keys(trCache);
-    if (keys.length > 600) keys.slice(0, keys.length - 600).forEach((k) => delete trCache[k]);
-    lsSet("tb-tr", trCache);
-  }, 500);
-  return out;
-}
-
-/* ---------- Til ---------- */
-function detectLang() {
-  const s = lsGet("lang", null);
-  if (s && T[s]) return s;
-  const n = (navigator.language || "uz").slice(0, 2);
-  return T[n] ? n : "uz";
-}
-
-async function setLang(l, animate = true) {
-  if (!T[l]) return;
-  if (animate && !reduced && l !== state.lang) { document.body.classList.add("switching"); await sleep(260); }
-  state.lang = l; lsSet("lang", l);
-  applyLang();
-  requestAnimationFrame(() => document.body.classList.remove("switching"));
-}
-
-function applyLang() {
-  document.documentElement.lang = state.lang;
-  document.querySelectorAll("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n)));
-  document.querySelectorAll("[data-i18n-ph]").forEach((el) => (el.placeholder = t(el.dataset.i18nPh)));
-  $("lang").value = state.lang;
-  document.querySelectorAll("#gateLangs button").forEach((b) => b.classList.toggle("on", b.dataset.l === state.lang));
-  const ctry = (c) => `${FLAGS[c]} ${t("country")[c]}`;
-  fillSelect($("fCategory"), CATEGORIES.map((c) => [c.id, `${c.icon} ${t("cat")[c.id]}`]));
-  fillSelect($("fCountry"), COUNTRIES.map((c) => [c, ctry(c)]));
-  fillSelect($("countryFilter"), [["all", `🌍 ${t("allCountries")}`], ...COUNTRIES.map((c) => [c, ctry(c)])], state.country);
-  $("flags").innerHTML = COUNTRIES.map((c, i) => `<span style="--i:${i}" title="${t("country")[c]}">${FLAGS[c]}</span>`).join("");
-  renderProverb(); renderCats(); renderPosts();
-}
-
-function fillSelect(sel, items, value) {
-  const keep = value ?? sel.value;
-  sel.innerHTML = "";
-  for (const [v, label] of items) sel.add(new Option(label, v));
-  if (keep && [...sel.options].some((o) => o.value === keep)) sel.value = keep;
-}
-
-/* ---------- Kun maqoli ---------- */
-function renderProverb() {
-  const p = PROVERBS[state.proverb];
-  const native = COUNTRY_LANG[p.c];
-  const q = $("proverb");
-  q.classList.remove("pop"); void q.offsetWidth; q.classList.add("pop");
-  q.textContent = `«${p.t[state.lang]}»`;
-  $("proverbFrom").textContent = `${FLAGS[p.c]} ${t("country")[p.c]}`;
-  $("proverbOrig").textContent = native !== state.lang ? `${t("origLabel")}: «${p.t[native]}»` : "";
-  $("proverbDots").innerHTML = PROVERBS.map((_, i) => `<i class="${i === state.proverb ? "on" : ""}"></i>`).join("");
-}
-
-/* ---------- Bo'limlar ---------- */
-function renderCats() {
-  const counts = {};
-  state.posts.forEach((p) => (counts[p.category] = (counts[p.category] || 0) + 1));
-  const items = [{ id: "all", icon: "✨" }, ...CATEGORIES];
-  $("cats").innerHTML = "";
-  items.forEach((c, i) => {
-    const b = document.createElement("button");
-    b.className = "cat reveal" + (state.cat === c.id ? " on" : "");
-    b.style.setProperty("--d", i * 40 + "ms");
-    const n = c.id === "all" ? state.posts.length : counts[c.id] || 0;
-    b.innerHTML = `<i>${c.icon}</i><span></span><em>${n}</em>`;
-    b.querySelector("span").textContent = c.id === "all" ? t("all") : t("cat")[c.id];
-    b.onclick = () => { state.cat = c.id; renderCats(); renderPosts(); $("feed").scrollIntoView({ behavior: "smooth" }); };
-    $("cats").append(b);
-  });
-  observeReveals($("cats"));
-}
-
-/* ---------- Maqolalar ---------- */
-function postText(p) {
-  if (p.i18n) return { title: p.title[state.lang], body: p.body[state.lang], proverb: PROVERBS[p.proverb].t[state.lang], native: true };
-  return { title: p.title, body: p.body, proverb: p.proverb, native: p.lang === state.lang };
-}
-
-function renderPosts() {
-  const q = state.q.toLowerCase();
-  const list = state.posts.filter((p) => {
-    if (state.cat !== "all" && p.category !== state.cat) return false;
-    if (state.country !== "all" && p.country !== state.country) return false;
-    if (!q) return true;
-    const x = postText(p);
-    return [x.title, x.body, x.proverb, p.authorName].join(" ").toLowerCase().includes(q);
-  });
-  const box = $("posts");
-  box.innerHTML = "";
-  $("empty").hidden = list.length > 0;
-  const icon = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.icon]));
-  list.forEach((p, i) => {
-    const x = postText(p);
-    const el = document.createElement("article");
-    el.className = "post reveal";
-    el.style.setProperty("--d", Math.min(i, 8) * 70 + "ms");
-    el.innerHTML = `
-      <div class="meta"><span class="chip"></span><span class="flag"></span></div>
-      <h3></h3><p class="body"></p>
-      <blockquote><small></small><span class="pv"></span></blockquote>
-      <div class="trbar" hidden><span>🌐 <i></i></span><button type="button"></button></div>
-      <div class="author"><img alt=""><div><b></b><time></time></div></div>`;
-    el.querySelector(".chip").textContent = `${icon[p.category] || "📌"} ${t("cat")[p.category] || ""}`;
-    el.querySelector(".flag").textContent = `${FLAGS[p.country] || ""} ${t("country")[p.country] || ""}`;
-    el.querySelector("blockquote small").textContent = t("proverbLabel");
-    const set = (v) => {
-      el.querySelector("h3").textContent = v.title;
-      el.querySelector(".body").textContent = v.body;
-      el.querySelector(".pv").textContent = `«${v.proverb}»`;
-    };
-    set(x);
-    el.querySelector(".author b").textContent = p.i18n ? t("team") : p.authorName || "—";
-    el.querySelector("time").textContent = p.createdAt ? new Date(p.createdAt).toLocaleDateString(state.lang) : "";
-    const img = el.querySelector(".author img");
-    if (p.authorPhoto) { img.src = p.authorPhoto; img.referrerPolicy = "no-referrer"; }
-    else img.replaceWith(Object.assign(document.createElement("span"), { className: "ava", textContent: p.i18n ? "🐺" : (p.authorName || "?")[0] }));
-    if (state.user && state.user.uid === p.uid) {
-      const d = document.createElement("button");
-      d.className = "del"; d.textContent = t("deleteBtn");
-      d.onclick = async () => { if (confirm(t("deleteBtn") + "?")) await store.remove(p.id); };
-      el.querySelector(".author").append(d);
-    }
-    if (!x.native) translatePost(el, x, set);
-    box.append(el);
-  });
-  observeReveals(box);
-  countUp($("sPosts"), state.posts.length);
-  countUp($("sCountries"), new Set(state.posts.map((p) => p.country)).size || 6);
-}
-
-async function translatePost(el, orig, set) {
-  const lang = state.lang;
-  el.classList.add("translating");
-  try {
-    const [title, body, proverb] = await Promise.all([translate(orig.title, lang), translate(orig.body, lang), translate(orig.proverb, lang)]);
-    if (lang !== state.lang || !el.isConnected) return;
-    const tr = { title, body, proverb };
-    if (title === orig.title && body === orig.body) return;
-    set(tr);
-    const bar = el.querySelector(".trbar"), btn = bar.querySelector("button");
-    bar.querySelector("i").textContent = t("translated");
-    bar.hidden = false;
-    let showingOrig = false;
-    btn.textContent = t("original");
-    btn.onclick = () => { showingOrig = !showingOrig; set(showingOrig ? orig : tr); btn.textContent = showingOrig ? t("showTr") : t("original"); };
-  } catch { /* tarjima ishlamasa asl matn qoladi */ }
-  finally { el.classList.remove("translating"); }
-}
-
-/* ---------- Foydalanuvchi va ro'yxatdan o'tish oynasi ---------- */
-function renderUser() {
-  const u = state.user;
-  document.body.classList.remove("loading");
-  $("gate").hidden = !!u;
-  document.body.classList.toggle("locked", !u);
-  $("user").hidden = !u;
-  $("fab").hidden = !u;
-  if (u) {
-    const initial = (u.name || "?")[0].replace(/[<&>"']/g, "");
-    $("avatar").referrerPolicy = "no-referrer";
-    $("avatar").src = u.photo || `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="#14b8d4"/><text x="20" y="27" font-size="18" text-anchor="middle" fill="#fff" font-family="sans-serif">${initial}</text></svg>`)}`;
-    $("avatar").title = u.name;
-    $("hello").textContent = (u.name || "").split(" ")[0];
-    observeReveals();
+  function store(key, val) {
+    try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch (e) { return null; }
   }
-  renderPosts();
-}
 
-function setupGate() {
-  const box = $("gateLangs");
-  for (const [k, v] of Object.entries(LANGS)) {
-    const b = document.createElement("button");
-    b.type = "button"; b.dataset.l = k; b.textContent = v;
-    b.onclick = () => setLang(k);
-    box.append(b);
-  }
-  // Shior barcha turkiy tillarda navbat bilan almashadi
-  const codes = Object.keys(LANGS);
-  let i = 0;
-  const el = $("gateSlogan");
-  const show = () => { el.textContent = T[codes[i]].slogan; el.classList.remove("fadein"); void el.offsetWidth; el.classList.add("fadein"); };
-  show();
-  setInterval(() => { if (!$("gate").hidden) { i = (i + 1) % codes.length; show(); } }, 2600);
-}
-
-/* ---------- Ma'lumotlar qatlami: Firebase ---------- */
-async function firebaseStore() {
-  const [{ initializeApp }, A, F] = await Promise.all([
-    import(FB + "firebase-app.js"), import(FB + "firebase-auth.js"), import(FB + "firebase-firestore.js"),
-  ]);
-  const app = initializeApp(firebaseConfig);
-  const auth = A.getAuth(app);
-  const db = F.getFirestore(app);
-  const provider = new A.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-
-  const refreshMembers = () => F.getCountFromServer(F.collection(db, "users"))
-    .then((s) => countUp($("sMembers"), s.data().count)).catch(() => {});
-
-  A.getRedirectResult(auth).catch((e) => toast(e.message));
-  A.onAuthStateChanged(auth, async (u) => {
-    state.user = u ? { uid: u.uid, name: u.displayName, photo: u.photoURL } : null;
-    if (u) {
-      await F.setDoc(F.doc(db, "users", u.uid), { name: u.displayName || "", lang: state.lang, joinedAt: F.serverTimestamp() }, { merge: true }).catch(() => {});
-      refreshMembers();
-    }
-    renderUser();
+  /* ---------- Mobil menyu ---------- */
+  var navToggle = document.querySelector(".nav-toggle");
+  var navList = document.getElementById("nav-list");
+  navToggle.addEventListener("click", function () {
+    var open = navList.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", open);
+  });
+  navList.addEventListener("click", function (e) {
+    if (e.target.tagName === "A") { navList.classList.remove("open"); navToggle.setAttribute("aria-expanded", "false"); }
   });
 
-  F.onSnapshot(F.query(F.collection(db, "posts"), F.orderBy("createdAt", "desc"), F.limit(200)), (snap) => {
-    const live = snap.docs.map((d) => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toMillis?.() || Date.now() }));
-    state.posts = [...live, ...samplePosts()];
-    renderCats(); renderPosts();
-  }, () => {});
-  refreshMembers();
+  /* ---------- Shrift oʻlchami ---------- */
+  var fs = parseInt(store("kz-fs"), 10) || 100;
+  function applyFs() { root.style.setProperty("--fs", fs + "%"); store("kz-fs", fs); }
+  applyFs();
+  document.getElementById("font-up").addEventListener("click", function () {
+    fs = Math.min(fs + 10, 160); applyFs(); announce("Matn kattalashtirildi: " + fs + " foiz");
+  });
+  document.getElementById("font-down").addEventListener("click", function () {
+    fs = Math.max(fs - 10, 80); applyFs(); announce("Matn kichraytirildi: " + fs + " foiz");
+  });
 
-  return {
-    login: async () => {
-      try { await A.signInWithPopup(auth, provider); }
-      catch (e) {
-        if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment"].includes(e.code)) return A.signInWithRedirect(auth, provider);
-        if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") toast(e.message);
+  /* ---------- Kontrast va mavzu ---------- */
+  var contrastBtn = document.getElementById("contrast");
+  function setContrast(on) {
+    root.classList.toggle("hc", on);
+    contrastBtn.setAttribute("aria-pressed", on);
+    store("kz-hc", on ? "1" : "0");
+  }
+  setContrast(store("kz-hc") === "1");
+  contrastBtn.addEventListener("click", function () {
+    var on = !root.classList.contains("hc");
+    setContrast(on); announce(on ? "Yuqori kontrast yoqildi" : "Yuqori kontrast oʻchirildi");
+  });
+
+  var themeBtn = document.getElementById("theme");
+  var mq = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() { var t = root.getAttribute("data-theme"); return t ? t === "dark" : mq.matches; }
+  function syncTheme() { themeBtn.setAttribute("aria-pressed", isDark()); }
+  var savedTheme = store("kz-theme");
+  if (savedTheme) root.setAttribute("data-theme", savedTheme);
+  syncTheme();
+  mq.addEventListener && mq.addEventListener("change", syncTheme);
+  themeBtn.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next); store("kz-theme", next); syncTheme();
+    announce(next === "dark" ? "Qorongʻi rejim yoqildi" : "Yorugʻ rejim yoqildi");
+  });
+
+  /* ---------- Nutq sintezi ---------- */
+  var synth = window.speechSynthesis;
+  var voice = null;
+  function pickVoice() {
+    if (!synth) return;
+    var vs = synth.getVoices();
+    var prefs = ["uz", "tr", "kk", "ru"];
+    for (var i = 0; i < prefs.length && !voice; i++) {
+      for (var j = 0; j < vs.length; j++) {
+        if (vs[j].lang && vs[j].lang.toLowerCase().indexOf(prefs[i]) === 0) { voice = vs[j]; break; }
       }
-    },
-    logout: () => A.signOut(auth),
-    add: (p) => F.addDoc(F.collection(db, "posts"), {
-      ...p, uid: state.user.uid, authorName: state.user.name || "", authorPhoto: state.user.photo || "", createdAt: F.serverTimestamp(),
-    }),
-    remove: (id) => F.deleteDoc(F.doc(db, "posts", id)),
+    }
+  }
+  if (synth) { pickVoice(); synth.onvoiceschanged = pickVoice; }
+
+  function speak(text, onEnd) {
+    if (!synth) { if (onEnd) onEnd(); return; }
+    var u = new SpeechSynthesisUtterance(text.replace(/[ʻʼ‘’]/g, "'"));
+    u.lang = voice ? voice.lang : "uz-UZ";
+    if (voice) u.voice = voice;
+    u.rate = 0.95;
+    u.onend = u.onerror = function () { if (onEnd) onEnd(); };
+    synth.speak(u);
+  }
+
+  /* ---------- Sahifani ovoz bilan oʻqish ---------- */
+  var readBtn = document.getElementById("read-page");
+  var readLbl = readBtn.querySelector(".lbl");
+  var reading = false, queue = [], current = null;
+
+  function sectionText(el) {
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll("[aria-hidden='true'], .sr-only + .legend, script").forEach(function (n) { n.remove(); });
+    return clone.textContent.replace(/\s+/g, " ").trim();
+  }
+  function stopReading() {
+    reading = false; queue = [];
+    if (synth) synth.cancel();
+    if (current) current.classList.remove("reading");
+    current = null;
+    readBtn.setAttribute("aria-pressed", "false");
+    readLbl.textContent = "Sahifani ovoz bilan oʻqish";
+  }
+  function next() {
+    if (current) current.classList.remove("reading");
+    if (!reading || !queue.length) { stopReading(); return; }
+    current = queue.shift();
+    current.classList.add("reading");
+    current.scrollIntoView({ behavior: "smooth", block: "start" });
+    speak(sectionText(current), next);
+  }
+  function startReading() {
+    if (!synth) { announce("Brauzeringiz ovozli oʻqishni qoʻllab-quvvatlamaydi"); alert("Brauzeringiz ovozli oʻqishni qoʻllab-quvvatlamaydi."); return; }
+    synth.cancel();
+    reading = true;
+    queue = Array.prototype.slice.call(document.querySelectorAll("[data-read]"));
+    readBtn.setAttribute("aria-pressed", "true");
+    readLbl.textContent = "Oʻqishni toʻxtatish";
+    next();
+  }
+  readBtn.addEventListener("click", function () { reading ? stopReading() : startReading(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.altKey && (e.key === "r" || e.key === "R")) { e.preventDefault(); reading ? stopReading() : startReading(); }
+    if (e.key === "Escape" && reading) stopReading();
+  });
+
+  /* ---------- Prototip namoyishi ---------- */
+  var chat = document.getElementById("chat");
+  var demos = {
+    pul:  { q: "🎙 “Bu qancha pul?”", a: [["ai", "🔊 <strong>Yuz ming soʻm</strong>, bitta banknota. Yana bittasi — <strong>besh ming soʻm</strong>. Jami: bir yuz besh ming soʻm."]] },
+    oqi:  { q: "🎙 “Oʻqib ber”", a: [["ai", "🔊 Sut, 1 litr. Yogʻliligi 3,2 foiz. Yaroqlilik muddati: 28-noyabrgacha."]] },
+    yol:  { q: "🎙 “Oldimda nima bor?”", a: [["ai", "🔊 Oldingizda ochiq eshik, oʻng tomonda stul."], ["warn", "📳 Diqqat: 1 metr oldinda zinapoya, 5 ta pogʻona pastga"]] },
+    rang: { q: "🎙 “Bu qanday rang?”", a: [["ai", "🔊 Toʻq koʻk rang. Ustida oq chiziqlar bor."]] }
   };
-}
+  var busy = false;
+  function add(cls, html) {
+    var d = document.createElement("div");
+    d.className = "msg " + cls; d.innerHTML = html;
+    chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+    return d;
+  }
+  function plain(html) { var t = document.createElement("div"); t.innerHTML = html; return t.textContent.replace(/^[^\wА-яЁёA-Za-zʻʼ]+/, "").trim(); }
 
-function samplePosts() {
-  return SAMPLES.map((s) => ({ ...s, i18n: true, uid: "team", createdAt: Date.now() - s.ago * 864e5 }));
-}
+  document.querySelectorAll("[data-demo]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (busy) return;
+      var d = demos[btn.getAttribute("data-demo")];
+      if (!d) return;
+      busy = true;
+      if (reading) stopReading();
+      add("me", d.q);
+      var typing = add("typing", "•••");
+      typing.setAttribute("aria-hidden", "true");
+      setTimeout(function () {
+        typing.remove();
+        var i = 0;
+        (function step() {
+          if (i >= d.a.length) { busy = false; return; }
+          var m = d.a[i++];
+          add(m[0], m[1]);
+          if (m[0] === "warn" && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+          speak(plain(m[1]), step);
+          if (!synth) setTimeout(step, 600);
+        })();
+      }, 900);
+    });
+  });
 
-/* ---------- Ma'lumotlar qatlami: namuna rejimi ---------- */
-function demoStore() {
-  $("demo").hidden = false;
-  const KEY = "tb-posts-v2", UKEY = "tb-user";
-  let posts = lsGet(KEY, []);
-  const sync = () => {
-    lsSet(KEY, posts);
-    state.posts = [...posts.sort((a, b) => b.createdAt - a.createdAt), ...samplePosts()];
-    renderCats(); renderPosts();
-  };
-  state.user = lsGet(UKEY, null);
-  $("sMembers").textContent = state.user ? 1 : 0;
-  sync(); renderUser();
-  return {
-    login: () => {
-      toast(t("demoLogin"));
-      state.user = { uid: "demo", name: "Mehmon", photo: "" };
-      lsSet(UKEY, state.user); countUp($("sMembers"), 1); renderUser();
-    },
-    logout: () => { state.user = null; lsSet(UKEY, null); renderUser(); },
-    add: async (p) => { posts.push({ ...p, id: "p" + Date.now(), uid: state.user.uid, authorName: state.user.name, createdAt: Date.now() }); sync(); },
-    remove: async (id) => { posts = posts.filter((p) => p.id !== id); sync(); },
-  };
-}
+  /* ---------- Paydo boʻlish va hisoblagichlar ---------- */
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  function countUp(el) {
+    var target = parseInt(el.getAttribute("data-count"), 10);
+    if (reduce) return;
+    var t0 = null, dur = 1400;
+    function f(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      el.textContent = fmt(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(f);
+    }
+    requestAnimationFrame(f);
+  }
 
-/* ---------- Ishga tushirish ---------- */
-async function init() {
-  state.lang = detectLang();
-  state.proverb = Math.floor(Date.now() / 864e5) % PROVERBS.length;
-  const sel = $("lang");
-  for (const [k, v] of Object.entries(LANGS)) sel.add(new Option(v, k));
-  sel.onchange = () => setLang(sel.value);
-  setupGate();
-  applyLang();
-  observeReveals();
-
-  $("proverbCard").onclick = () => { state.proverb = (state.proverb + 1) % PROVERBS.length; renderProverb(); };
-  $("q").oninput = (e) => { state.q = e.target.value; renderPosts(); };
-  $("countryFilter").onchange = (e) => { state.country = e.target.value; renderPosts(); };
-
-  try { store = firebaseConfig.apiKey ? await firebaseStore() : demoStore(); }
-  catch (e) { console.error(e); store = demoStore(); }
-
-  $("gateLogin").onclick = () => store.login();
-  $("logout").onclick = () => store.logout();
-  const openForm = () => { $("fCountry").value = Object.keys(COUNTRY_LANG).find((c) => COUNTRY_LANG[c] === state.lang) || "uz"; $("dlg").showModal(); };
-  $("shareBtn").onclick = openForm;
-  $("fab").onclick = openForm;
-  $("cancel").onclick = () => $("dlg").close();
-  $("form").onsubmit = async (e) => {
-    e.preventDefault();
-    const p = {
-      title: $("fTitle").value.trim(), body: $("fBody").value.trim(), proverb: $("fProverb").value.trim(),
-      category: $("fCategory").value, country: $("fCountry").value, lang: state.lang,
-    };
-    if (!p.title || !p.body || !p.proverb) return toast(t("fill"));
-    try { await store.add(p); $("form").reset(); $("dlg").close(); toast("✅ " + t("done")); }
-    catch (err) { toast(err.message); }
-  };
-}
-
-init();
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add("in");
+        en.target.querySelectorAll("[data-count]").forEach(countUp);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+    document.querySelectorAll(".reveal").forEach(function (el, i) {
+      el.style.transitionDelay = (i % 4) * 80 + "ms";
+      io.observe(el);
+    });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+  }
+})();
