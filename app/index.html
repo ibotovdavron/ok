@@ -16,6 +16,12 @@
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
+  <button id="start" class="start" hidden>
+    <span class="start-logo" aria-hidden="true"></span>
+    <span class="start-title">KoʻzMadad AI</span>
+    <span class="start-sub">Boshlash uchun ekranning istalgan joyiga bosing</span>
+  </button>
+
   <main class="app" aria-label="KoʻzMadad AI ilovasi">
     <header class="bar">
       <h1 class="title"><span class="logo" aria-hidden="true"></span>KoʻzMadad AI</h1>
@@ -25,36 +31,40 @@
     <section class="viewer" aria-label="Kamera">
       <video id="video" playsinline muted aria-hidden="true"></video>
       <canvas id="canvas" hidden></canvas>
+      <canvas id="overlay" class="overlay" aria-hidden="true"></canvas>
       <div id="cam-off" class="cam-off">
-        <p>Kamerani yoqish uchun pastdagi istalgan tugmani bosing.</p>
+        <p>Kamera tugma bosilganda yoqiladi.</p>
       </div>
       <div class="aim" aria-hidden="true"></div>
       <div id="busy" class="busy" hidden aria-hidden="true"><span></span></div>
+      <div id="nav-badge" class="nav-badge" hidden aria-hidden="true">YOʻLDA YORDAM</div>
     </section>
 
     <section class="result-wrap" aria-label="Natija">
-      <p id="result" class="result" role="status" aria-live="assertive">Salom! Men KoʻzMadad yordamchisiman. Tugmani bosing yoki mikrofonga gapiring.</p>
+      <p id="result" class="result" role="status" aria-live="polite">Salom! Tugmani bosing yoki mikrofonga gapiring.</p>
       <button id="btn-repeat" class="link-btn">🔁 Qayta eshitish</button>
     </section>
 
     <nav class="actions" aria-label="Asosiy amallar">
+      <button class="act" data-mode="color"><span class="ai" aria-hidden="true">🎨</span><span>Rangi qanday?</span></button>
+      <button class="act act-mic" id="btn-mic" aria-pressed="false"><span class="ai" aria-hidden="true">🎙</span><span>Ovozli buyruq</span></button>
       <button class="act" data-mode="read"><span class="ai" aria-hidden="true">📖</span><span>Matnni oʻqi</span></button>
       <button class="act" data-mode="object"><span class="ai" aria-hidden="true">👁</span><span>Bu nima?</span></button>
-      <button class="act" data-mode="color"><span class="ai" aria-hidden="true">🎨</span><span>Rangi qanday?</span></button>
-      <button class="act act-mic" id="btn-mic" aria-pressed="false"><span class="ai" aria-hidden="true">🎙</span><span>Gapiring</span></button>
+      <button class="act act-nav" id="btn-nav" aria-pressed="false"><span class="ai" aria-hidden="true">🦯</span><span class="nav-lbl">Yoʻlda yordam</span></button>
     </nav>
   </main>
 
   <dialog id="help" aria-labelledby="help-title">
     <h2 id="help-title">Qanday foydalaniladi</h2>
     <ul>
-      <li><b>Matnni oʻqi</b> — kitob, xat, dori qutisi yoki yorliqni kameraga tuting. Lotin va kirill yozuvini oʻqiydi.</li>
-      <li><b>Bu nima?</b> — oldingizdagi buyum va odamlarni, ular qaysi tomonda ekanini aytadi.</li>
-      <li><b>Rangi qanday?</b> — ekran markazidagi narsaning rangini aytadi.</li>
-      <li><b>Gapiring</b> — “oʻqi”, “bu nima”, “rang” yoki “takrorla” deng.</li>
+      <li><b>🦯 Yoʻlda yordam</b> (eng pastdagi keng tugma) — yurib ketayotganda oldingizdagi toʻsiqlarni, taxminiy masofasini aytadi va qaysi tomondan oʻtishni maslahat beradi. Yaqinlashgan sari telefon kuchliroq tebranadi. Telefonni koʻkrak balandligida, kamerani oldinga qaratib ushlang.</li>
+      <li><b>📖 Matnni oʻqi</b> — kitob, xat, dori qutisini 20–40 sm masofada tuting. Lotin va kirill yozuvini oʻqiydi.</li>
+      <li><b>👁 Bu nima?</b> — oldingizdagi buyum va odamlarni, qaysi tomonda ekanini aytadi.</li>
+      <li><b>🎨 Rangi qanday?</b> — markazdagi narsaning rangini aytadi.</li>
+      <li><b>🎙 Ovozli buyruq</b> — “oʻqi”, “bu nima”, “rang”, “yoʻl” yoki “takrorla” deng.</li>
     </ul>
-    <p>Telefonni 20–40 sm masofada, yorugʻ joyda tuting. Birinchi ishlatishda SI modellari yuklab olinadi (internet kerak), keyin internetsiz ham ishlaydi.</p>
-    <p class="warn">Ilova hassa va hamrohni almashtirmaydi. Pul tanish funksiyasi ishlab chiqilmoqda.</p>
+    <p class="warn">Ilova odam, mashina, velosiped, stul kabi buyumlarni taniydi, lekin ustun, chuqur va zinapoyani har doim ham koʻrmaydi. Hassa va hamrohni almashtirmaydi. Pul tanish funksiyasi ishlab chiqilmoqda.</p>
+    <p>Birinchi ishlatishda SI modellari yuklab olinadi (internet kerak), keyin internetsiz ham ishlaydi.</p>
     <p><a href="../">Loyiha haqida</a></p>
     <form method="dialog"><button class="btn">Tushunarli</button></form>
   </dialog>
