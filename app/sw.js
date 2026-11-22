@@ -1,6 +1,6 @@
 /* KoʻzMadad AI — oflayn kesh */
-var VERSION = "kozmadad-v2";
-var SHELL = ["./", "index.html", "app.css", "app.js", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png"];
+var VERSION = "kozmadad-v3";
+var SHELL = ["./", "index.html", "app.css", "app.js", "depth.js", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) {
@@ -32,6 +32,18 @@ self.addEventListener("fetch", function (e) {
     }));
   } else if (url.origin === location.origin) {
     // Ilova fayllari: avval tarmoq, boʻlmasa kesh
+    if (req.mode === "navigate") {
+      // Sahifaga COOP/COEP sarlavhalarini qoʻshamiz — SI modeli bir nechta protsessor yadrosida tezroq ishlaydi
+      e.respondWith(fetch(req).catch(function () { return caches.match(req, { ignoreSearch: true }); }).then(function (res) {
+        if (!res) return res;
+        if (res.ok) { var cp = res.clone(); caches.open(VERSION).then(function (c) { c.put(req, cp); }); }
+        var h = new Headers(res.headers);
+        h.set("Cross-Origin-Opener-Policy", "same-origin");
+        h.set("Cross-Origin-Embedder-Policy", "require-corp");
+        return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+      }));
+      return;
+    }
     e.respondWith(fetch(req).then(function (res) {
       var copy = res.clone(); caches.open(VERSION).then(function (c) { c.put(req, copy); });
       return res;

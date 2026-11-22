@@ -98,11 +98,11 @@
 "a_careful": "Ehtiyot boʻling.",
 "a_clear": "Yoʻl ochiq.",
 "a_slow": "Sekinroq yuring.",
-"nav_on": "Yoʻlda yordam yoqildi. Telefonni koʻkrak balandligida, kamerani oldinga qaratib ushlang. Oldingizdagi toʻsiqlarni aytib boraman.",
+"nav_on": "Yoʻlda yordam yoqildi. Telefonni koʻkrak balandligida, kamerani oldinga va biroz pastga qaratib ushlang. Toʻsiqlar, zinapoya va chuqurlarni aytib boraman.",
 "nav_off": "Yoʻlda yordam oʻchirildi.",
-"nav_note": "Diqqat: men odam, mashina, velosiped, stul va boshqa buyumlarni taniyman. Ustun, chuqur va zinapoyani har doim ham koʻrmayman. Hassangizni qoʻldan qoʻymang.",
+"nav_note": "Diqqat: men odam, mashina, stul kabi buyumlarni, zinapoya va chuqurlarni aniqlashga harakat qilaman, lekin har doim ham toʻgʻri topa olmayman. Kichik pogʻona va ustunlarni koʻrmasligim mumkin. Hassangizni qoʻldan qoʻymang.",
 "welcome": "Assalomu alaykum! Men KoʻzMadad yordamchisiman. Ekranning pastki qismida beshta katta tugma bor. Eng pastdagi keng tugma — yoʻlda yordam. Uning ustida: chapda matnni oʻqish, oʻngda bu nima. Undan yuqorida: chapda rang, oʻngda ovozli buyruq.",
-"help": "Matnni oʻqish uchun kitob yoki yorliqni kameraga yigirma-qirq santimetr masofada tuting. Bu nima tugmasi oldingizdagi buyumlarni aytadi. Rang tugmasi markazdagi narsaning rangini aytadi. Yoʻlda yordam — yurib ketayotganda toʻsiqlarni aytadi. Ovozli buyruq tugmasini bosib, oʻqi, bu nima, rang, yoʻl yoki takrorla deng.",
+"help": "Matnni oʻqish uchun kitob yoki yorliqni kameraga yigirma-qirq santimetr masofada tuting. Bu nima tugmasi oldingizdagi buyumlarni aytadi. Rang tugmasi markazdagi narsaning rangini aytadi. Yoʻlda yordam — yurib ketayotganda toʻsiqlar, zinapoya va chuqurlarni aytadi. Ovozli buyruq tugmasini bosib, oʻqi, bu nima, rang, yoʻl yoki takrorla deng.",
 "load_ocr": "Matn oʻqish modeli yuklanmoqda. Biroz kuting.",
 "load_obj": "Buyumlarni tanish modeli yuklanmoqda. Biroz kuting.",
 "reading": "Oʻqiyapman.",
@@ -132,5 +132,9 @@
 "c_cyan": "moviy.",
 "c_blue": "koʻk.",
 "c_purple": "binafsha.",
-"c_pink": "pushti."
+"c_pink": "pushti.",
+"h_drop": "Oldinda pastlik: chuqur yoki pastga tushadigan zinapoya.",
+"h_stairs_up": "Oldinda yuqoriga chiqadigan zinapoya.",
+"h_wall": "Oldinda devor yoki katta toʻsiq.",
+"h_tilt": "Telefonni biroz pastga egib ushlang. Oyogʻingiz oldidagi yerni koʻrishim kerak."
 }

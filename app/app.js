@@ -250,7 +250,10 @@
   // Yoʻlda ahamiyatsiz kichik buyumlar
   var IGNORE = { fork: 1, knife: 1, spoon: 1, cup: 1, "wine glass": 1, "cell phone": 1, mouse: 1, remote: 1,
     toothbrush: 1, "hair drier": 1, scissors: 1, book: 1, banana: 1, apple: 1, orange: 1, sandwich: 1,
-    broccoli: 1, carrot: 1, "hot dog": 1, pizza: 1, donut: 1, cake: 1, tie: 1, clock: 1, vase: 1, keyboard: 1, laptop: 1 };
+    broccoli: 1, carrot: 1, "hot dog": 1, pizza: 1, donut: 1, cake: 1, tie: 1, clock: 1, vase: 1, keyboard: 1, laptop: 1,
+    // koʻchada deyarli uchramaydigan, koʻpincha xato taniladigan sinflar
+    airplane: 1, kite: 1, frisbee: 1, skis: 1, snowboard: 1, surfboard: 1, elephant: 1, bear: 1, zebra: 1, giraffe: 1,
+    "sports ball": 1, "baseball bat": 1, "baseball glove": 1, "tennis racket": 1, boat: 1, "teddy bear": 1 };
 
   var nav = { on: false, timer: null, lastKey: "", lastAt: 0, lastObstacleAt: 0, saidClear: true, wake: null, frames: {} };
 
@@ -278,73 +281,155 @@
     });
   }
 
-  function navTick() {
-    if (!nav.on) return;
-    if (!cocoModel || video.readyState < 2) { nav.timer = setTimeout(navTick, 300); return; }
+  /* --- Telefon qiyaligi (zinapoya/chuqur masofasini hisoblash uchun) --- */
+  var tilt = { pitch: null };
+  window.addEventListener("deviceorientation", function (e) {
+    if (e.beta == null) return;
+    // tik ushlangan telefon: beta≈90 → kamera ufqqa qaragan; pastga egilsa beta kamayadi
+    tilt.pitch = Math.max(-40, Math.min(85, 90 - Math.abs(e.beta)));
+  });
+  function askOrientation() {
+    try {
+      if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function")
+        DeviceOrientationEvent.requestPermission().catch(function () {});
+    } catch (e) {}
+  }
+
+  var depthOk = false;
+  nav.hz = [];            // oxirgi 3 ta chuqurlik natijasi
+  nav.hazard = null;      // barqaror xavf: {type, meters}
+  nav.objMain = null;
+  nav.lastTiltAt = 0;
+
+  function objectsStep(now) {
     var c = grab(480), W = c.width, H = c.height;
-    cocoModel.detect(c, 20, 0.45).then(function (preds) {
-      if (!nav.on) return;
-      var now = Date.now();
+    return cocoModel.detect(c, 20, 0.45).then(function (preds) {
       var objs = preds.filter(function (p) { return !IGNORE[p.class]; }).map(function (p) {
         var cx = (p.bbox[0] + p.bbox[2] / 2) / W;
         var x0 = p.bbox[0] / W, x1 = (p.bbox[0] + p.bbox[2]) / W;
-        var inPath = x1 > 0.3 && x0 < 0.7;                            // yurish yoʻlagi — markaziy qism
-        return { p: p, cx: cx, inPath: inPath, side: sideOf(cx), m: estimateMeters(p, W, H) };
+        return { p: p, cx: cx, inPath: x1 > 0.3 && x0 < 0.7, side: sideOf(cx), m: estimateMeters(p, W, H) };
       });
       drawBoxes(objs, W, H);
-
-      // Barqarorlik: buyum ketma-ket 2 kadrda koʻrinsa hisobga olinadi
       var seen = {};
       objs.forEach(function (o) { var k = o.p.class + "|" + o.side; seen[k] = (nav.frames[k] || 0) + 1; });
       nav.frames = seen;
-      var stable = objs.filter(function (o) { return seen[o.p.class + "|" + o.side] >= 2 || o.m < 1.2; });
+      nav.stable = objs.filter(function (o) { return seen[o.p.class + "|" + o.side] >= 2 || o.m < 1.2; });
+      var path = nav.stable.filter(function (o) { return o.inPath && o.m < 5; }).sort(function (a, b) { return a.m - b.m; });
+      nav.objMain = path[0] || null;
+    });
+  }
 
-      var path = stable.filter(function (o) { return o.inPath && o.m < 5; }).sort(function (a, b) { return a.m - b.m; });
-      var main = path[0];
+  function depthStep(now) {
+    var pitch = tilt.pitch;
+    if (pitch != null && pitch < 12) {           // kamera ufqqa yoki tepaga qaragan — pol koʻrinmaydi
+      nav.hz = []; nav.hazard = null;
+      if (now - nav.lastTiltAt > 15000 && Date.now() > speakingUntil) { nav.lastTiltAt = now; play(["h_tilt"]); }
+      return Promise.resolve();
+    }
+    return KZDepth.run(video, pitch == null ? 30 : pitch).then(function (res) {
+      nav.hz.push(res); if (nav.hz.length > 3) nav.hz.shift();
+      // ketma-ket 3 natijadan kamida 2 tasida bir xil xavf boʻlsa — ishonchli
+      var counts = {};
+      nav.hz.forEach(function (h) { if (h.type === "drop" || h.type === "stairs_up" || h.type === "wall") counts[h.type] = (counts[h.type] || 0) + 1; });
+      var best = null;
+      ["drop", "stairs_up", "wall"].forEach(function (t) { if (!best && counts[t] >= 2) best = t; });
+      // yaqin pastlik — bitta kadrda koʻrinsa ham darhol ogohlantiramiz
+      if (!best && res.type === "drop" && res.meters < 2.2) best = "drop";
+      if (best) {
+        var lastOf = null; nav.hz.forEach(function (h) { if (h.type === best) lastOf = h; });
+        var maxM = best === "wall" ? 2 : 4.5;
+        var m = lastOf.meters;
+        // Pastlik "uzoqlashib" keta olmaydi: yaqinda yaqin koʻringan boʻlsa, oʻsha masofani saqlaymiz
+        if (best === "drop" && nav.dropMem && now - nav.dropMem.at < 8000 && m > nav.dropMem.meters) m = nav.dropMem.meters;
+        nav.hazard = m <= maxM ? { type: best, meters: m } : null;
+        if (nav.hazard && best === "drop") nav.dropMem = { meters: m, at: now };
+      } else nav.hazard = null;
+      // Pastlik chetiga juda yaqinlashganda u kadrdan chiqib ketadi — xavfni bir necha soniya eslab qolamiz
+      if (!nav.hazard && nav.dropMem && now - nav.dropMem.at < 6000 && nav.dropMem.meters < 2.2)
+        nav.hazard = { type: "drop", meters: nav.dropMem.meters, remembered: true };
+    });
+  }
 
-      // Tebranish: toʻsiq yaqinlashgan sari tezroq va kuchliroq
-      if (main) {
-        nav.lastObstacleAt = now;
-        if (main.m < 1) vibrate([300, 80, 300]);
-        else if (main.m < 1.6) vibrate(180);
-        else if (main.m < 2.6 && (nav.tick = (nav.tick || 0) + 1) % 3 === 0) vibrate(70);
+  function decide(now) {
+    var main = nav.objMain, hz = nav.hazard, idle = Date.now() > speakingUntil, ids = null, key = "", urgent = false;
+    // Xavf darajasi: pastlik eng xavfli (masofasi 0.7 ga koʻpaytirib solishtiriladi)
+    var hzScore = hz ? hz.meters * (hz.type === "drop" ? 0.7 : 1) : 99;
+    var obScore = main ? main.m : 99;
+
+    if (main) {
+      nav.lastObstacleAt = now;
+      if (main.m < 1) vibrate([300, 80, 300]);
+      else if (main.m < 1.6) vibrate(180);
+      else if (main.m < 2.6 && (nav.tick = (nav.tick || 0) + 1) % 3 === 0) vibrate(70);
+    }
+    if (hz) {
+      nav.lastObstacleAt = now;
+      if (hz.type === "drop" && hz.meters < 1.8) vibrate([500, 100, 500]);
+      else if (hz.meters < 1.8) vibrate([150, 80, 150]);
+    }
+
+    if (hz && hzScore <= obScore) {
+      var dId = distId(hz.meters);
+      urgent = hz.type === "drop" ? hz.meters < 2.6 : hz.meters < 1.8;
+      key = "hz|" + hz.type + "|" + dId;
+      ids = [];
+      if (hz.type === "drop" && urgent) ids.push("a_stop");
+      ids.push(hz.type === "drop" ? "h_drop" : hz.type === "stairs_up" ? "h_stairs_up" : "h_wall", dId);
+      if (urgent && hz.type !== "stairs_up") ids.push("a_careful");
+    } else if (main) {
+      var dId2 = distId(main.m);
+      urgent = dId2 === "d0" || dId2 === "d1";
+      key = main.p.class + "|" + main.side + "|" + dId2;
+      ids = [];
+      if (dId2 === "d0") ids.push("a_stop");
+      ids.push(objId(main.p.class), main.side, dId2);
+      if (urgent) {
+        var st = nav.stable || [];
+        var leftBusy = st.some(function (o) { return o.cx < 0.45 && o.m < 2.6 && o !== main; });
+        var rightBusy = st.some(function (o) { return o.cx > 0.55 && o.m < 2.6 && o !== main; });
+        if (main.cx >= 0.5 && !leftBusy) ids.push("a_go_left");
+        else if (main.cx < 0.5 && !rightBusy) ids.push("a_go_right");
+        else if (!leftBusy) ids.push("a_go_left");
+        else if (!rightBusy) ids.push("a_go_right");
+        else ids.push("a_careful");
       }
+    }
 
-      if (main) {
-        var dId = distId(main.m);
-        var key = main.p.class + "|" + main.side + "|" + dId;
-        var urgent = dId === "d0" || dId === "d1";
-        var repeatAfter = urgent ? 2500 : 6000;
-        var changed = key !== nav.lastKey;
-        var idle = Date.now() > speakingUntil;
-        if ((changed && (idle || urgent)) || (idle && now - nav.lastAt > repeatAfter)) {
-          var ids = [];
-          if (dId === "d0") ids.push("a_stop");
-          ids.push(objId(main.p.class), main.side, dId);
-          if (urgent) {
-            // qaysi tomon boʻshroq?
-            var leftBusy = stable.some(function (o) { return o.cx < 0.45 && o.m < 2.6 && o !== main; });
-            var rightBusy = stable.some(function (o) { return o.cx > 0.55 && o.m < 2.6 && o !== main; });
-            if (main.cx >= 0.5 && !leftBusy) ids.push("a_go_left");
-            else if (main.cx < 0.5 && !rightBusy) ids.push("a_go_right");
-            else if (!leftBusy) ids.push("a_go_left");
-            else if (!rightBusy) ids.push("a_go_right");
-            else ids.push("a_careful");
-          }
-          nav.lastKey = key; nav.lastAt = now; nav.saidClear = false;
-          play(ids, { noRepeat: false });
-        }
-      } else if (!nav.saidClear && now - nav.lastObstacleAt > 2500 && Date.now() > speakingUntil) {
-        nav.saidClear = true; nav.lastKey = "";
-        play(["a_clear"]);
+    if (ids) {
+      var repeatAfter = urgent ? 3000 : 7000;
+      var changed = key !== nav.lastKey;
+      var hzNew = changed && hz && key.indexOf("hz|") === 0;   // yangi xavf (zinapoya/pastlik) — darhol aytiladi
+      if ((changed && (idle || urgent || hzNew)) || (idle && now - nav.lastAt > repeatAfter)) {
+        nav.lastKey = key; nav.lastAt = now; nav.saidClear = false;
+        // Pastlik yoki zinapoyadan keyin "Yoʻl ochiq" aytilmaydi: chet kadrdan chiqib ketgan boʻlishi mumkin
+        nav.hazardWarned = nav.hazardWarned || key.indexOf("hz|") === 0;
+        play(ids);
       }
-      nav.timer = setTimeout(navTick, 250);
+    } else if (!nav.saidClear && !nav.hazardWarned && now - nav.lastObstacleAt > 2500 && idle) {
+      nav.saidClear = true; nav.lastKey = "";
+      play(["a_clear"]);
+    }
+  }
+
+  function navTick() {
+    if (!nav.on) return;
+    if (!cocoModel || video.readyState < 2) { nav.timer = setTimeout(navTick, 300); return; }
+    var now = Date.now();
+    nav.step = (nav.step || 0) + 1;
+    // navbat bilan: buyumlarni tanish va chuqurlik tahlili
+    var job = objectsStep(now).then(function () { return depthOk && nav.on ? depthStep(Date.now()) : null; });
+    job.then(function () {
+      if (!nav.on) return;
+      decide(Date.now());
+      nav.timer = setTimeout(navTick, 120);
     }).catch(function (e) { console.error(e); nav.timer = setTimeout(navTick, 800); });
   }
 
   function navStart() {
     if (busy) return;
     nav.on = true; nav.lastKey = ""; nav.lastAt = 0; nav.saidClear = true; nav.frames = {};
+    nav.hz = []; nav.hazard = null; nav.objMain = null; nav.step = 0; nav.dropMem = null; nav.hazardWarned = false;
+    askOrientation();
     navBtn.setAttribute("aria-pressed", "true");
     navBtn.querySelector(".nav-lbl").textContent = "Toʻxtatish";
     navBadge.hidden = false;
@@ -352,7 +437,8 @@
     vibrate([100, 60, 100]);
     if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { nav.wake = w; }).catch(function () {});
     var firstTime = !store("kz-nav-note");
-    startCamera().then(loadCoco).then(function () {
+    var depthJob = window.KZDepth ? KZDepth.load().then(function () { depthOk = true; }).catch(function (e) { console.error(e); depthOk = false; }) : Promise.resolve();
+    startCamera().then(loadCoco).then(function () { return depthJob; }).then(function () {
       if (!nav.on) return;
       var ids = ["nav_on"]; if (firstTime) { ids.push("nav_note"); store("kz-nav-note", "1"); }
       play(ids, { onend: function () { speakingUntil = 0; } });
