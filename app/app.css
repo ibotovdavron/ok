@@ -60,3 +60,23 @@ dialog a { color: var(--accent); }
 .btn { width: 100%; min-height: 52px; border: 0; border-radius: 14px; background: var(--purple); color: #fff; font: inherit; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+/* ===== Yoʻlda yordam va boshlash ekrani ===== */
+.act-nav { grid-column: 1 / -1; min-height: 104px; flex-direction: row; gap: 14px; font-size: 1.35rem; background: #1f6f43; }
+.act-nav .ai { font-size: 2.4rem; }
+.act-nav[aria-pressed="true"] { background: #c0182a; animation: pulse 1.4s ease-in-out infinite; }
+.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.nav-badge { position: absolute; top: 12px; left: 12px; background: #c0182a; color: #fff; font-weight: 800; font-size: .8rem; letter-spacing: .08em; padding: 6px 10px; border-radius: 8px; }
+.nav-badge[hidden] { display: none; }
+.actions { grid-template-rows: auto auto auto; }
+.act { min-height: 84px; }
+@media (max-height: 700px) { .act { min-height: 70px; } .act-nav { min-height: 80px; } .act .ai { font-size: 1.6rem; } }
+.start {
+  position: fixed; inset: 0; z-index: 100; width: 100%; height: 100%; border: 0; margin: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  background: radial-gradient(circle at 70% 20%, #4a1a7a, #170e20 70%); color: #fff; font: inherit; cursor: pointer; padding: 24px;
+}
+.start[hidden] { display: none; }
+.start-logo { width: 120px; height: 120px; border-radius: 30px; background: url("icons/icon.svg") center/cover; }
+.start-title { font-size: 2rem; font-weight: 800; }
+.start-sub { font-size: 1.3rem; color: var(--accent); max-width: 18ch; text-align: center; }
