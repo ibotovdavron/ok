@@ -336,3 +336,4 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25)
   .js .reveal { opacity: 1; transform: none; }
   .js .fin-chart:not(.in) .bar { transform: none; }
 }
+.nav a.nav-app { background: #7e22ce; }
