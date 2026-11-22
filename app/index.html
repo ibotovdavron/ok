@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>KoʻzMadad AI</title>
+  <meta name="description" content="Kameraga koʻrsat — eshit — mustaqil boʻl. Oʻzbek tilida gapiradigan SI yordamchi.">
+  <meta name="theme-color" content="#22152f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KoʻzMadad">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="app" aria-label="KoʻzMadad AI ilovasi">
+    <header class="bar">
+      <h1 class="title"><span class="logo" aria-hidden="true"></span>KoʻzMadad AI</h1>
+      <button id="btn-help" class="icon-btn" aria-label="Yordam: ilovadan qanday foydalanish">?</button>
+    </header>
+
+    <section class="viewer" aria-label="Kamera">
+      <video id="video" playsinline muted aria-hidden="true"></video>
+      <canvas id="canvas" hidden></canvas>
+      <div id="cam-off" class="cam-off">
+        <p>Kamerani yoqish uchun pastdagi istalgan tugmani bosing.</p>
+      </div>
+      <div class="aim" aria-hidden="true"></div>
+      <div id="busy" class="busy" hidden aria-hidden="true"><span></span></div>
+    </section>
+
+    <section class="result-wrap" aria-label="Natija">
+      <p id="result" class="result" role="status" aria-live="assertive">Salom! Men KoʻzMadad yordamchisiman. Tugmani bosing yoki mikrofonga gapiring.</p>
+      <button id="btn-repeat" class="link-btn">🔁 Qayta eshitish</button>
+    </section>
+
+    <nav class="actions" aria-label="Asosiy amallar">
+      <button class="act" data-mode="read"><span class="ai" aria-hidden="true">📖</span><span>Matnni oʻqi</span></button>
+      <button class="act" data-mode="object"><span class="ai" aria-hidden="true">👁</span><span>Bu nima?</span></button>
+      <button class="act" data-mode="color"><span class="ai" aria-hidden="true">🎨</span><span>Rangi qanday?</span></button>
+      <button class="act act-mic" id="btn-mic" aria-pressed="false"><span class="ai" aria-hidden="true">🎙</span><span>Gapiring</span></button>
+    </nav>
+  </main>
+
+  <dialog id="help" aria-labelledby="help-title">
+    <h2 id="help-title">Qanday foydalaniladi</h2>
+    <ul>
+      <li><b>Matnni oʻqi</b> — kitob, xat, dori qutisi yoki yorliqni kameraga tuting. Lotin va kirill yozuvini oʻqiydi.</li>
+      <li><b>Bu nima?</b> — oldingizdagi buyum va odamlarni, ular qaysi tomonda ekanini aytadi.</li>
+      <li><b>Rangi qanday?</b> — ekran markazidagi narsaning rangini aytadi.</li>
+      <li><b>Gapiring</b> — “oʻqi”, “bu nima”, “rang” yoki “takrorla” deng.</li>
+    </ul>
+    <p>Telefonni 20–40 sm masofada, yorugʻ joyda tuting. Birinchi ishlatishda SI modellari yuklab olinadi (internet kerak), keyin internetsiz ham ishlaydi.</p>
+    <p class="warn">Ilova hassa va hamrohni almashtirmaydi. Pul tanish funksiyasi ishlab chiqilmoqda.</p>
+    <p><a href="../">Loyiha haqida</a></p>
+    <form method="dialog"><button class="btn">Tushunarli</button></form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

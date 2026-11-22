@@ -1,0 +1,19 @@
+{
+  "name": "KoʻzMadad AI",
+  "short_name": "KoʻzMadad",
+  "description": "Koʻzi ojiz va zaif koʻruvchilar uchun oʻzbek tilida gapiradigan SI yordamchi",
+  "lang": "uz",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#170e20",
+  "theme_color": "#22152f",
+  "categories": ["accessibility", "utilities", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
